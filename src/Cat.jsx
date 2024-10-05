@@ -1,5 +1,7 @@
 import { useState, useEffect } from "react";
-import { useNavigate } from "react-router-dom"; // For navigation
+import { useNavigate } from "react-router-dom";
+import { useDispatch, useSelector } from "react-redux";
+import { addCatFavorite } from './features/favorites/favoritesSlice'; // Redux action for adding to favorites
 
 const Cat = () => {
   const [breeds, setBreeds] = useState([]);
@@ -7,20 +9,22 @@ const Cat = () => {
   const [breedDetails, setBreedDetails] = useState(null);
   const [catImage, setCatImage] = useState(null);
   const navigate = useNavigate();
+  const dispatch = useDispatch();
+  const catFavorites = useSelector((state) => state.favorites.catFavorites); // Access cat favorites from Redux
 
-  // Fetch the list of cat breeds with API key
+  // Fetch the list of cat breeds
   useEffect(() => {
     fetch("https://api.thecatapi.com/v1/breeds", {
       headers: {
         "x-api-key":
-          "live_FCuQpzIMhT4UPrEPFN0JLr2kEQBEpZU98u48fEvi8D8cp7PpCw9y9WOHrApB4MFO", // Your actual API key
+          "live_FCuQpzIMhT4UPrEPFN0JLr2kEQBEpZU98u48fEvi8D8cp7PpCw9y9WOHrApB4MFO", // API key
       },
     })
       .then((response) => response.json())
       .then((data) => setBreeds(data));
   }, []);
 
-  // Fetch cat breed details and image on breed selection
+  // Fetch breed details and image on breed selection
   const handleBreedChange = (e) => {
     const breedId = e.target.value;
     setSelectedBreed(breedId);
@@ -30,36 +34,57 @@ const Cat = () => {
     if (selectedBreed) {
       setBreedDetails(selectedBreed);
 
-      // If breed has a reference_image_id, fetch the image using it
+      // Fetch the breed image if available
       if (selectedBreed.reference_image_id) {
         fetch(`https://api.thecatapi.com/v1/images/${selectedBreed.reference_image_id}`, {
           headers: {
-            "x-api-key":
-              "live_FCuQpzIMhT4UPrEPFN0JLr2kEQBEpZU98u48fEvi8D8cp7PpCw9y9WOHrApB4MFO", // Your actual API key
+            "x-api-key": "live_FCuQpzIMhT4UPrEPFN0JLr2kEQBEpZU98u48fEvi8D8cp7PpCw9y9WOHrApB4MFO", // API key
           },
         })
           .then((response) => response.json())
           .then((imageData) => setCatImage(imageData.url));
       } else {
-        setCatImage(null); // Handle cases where no image is available
+        setCatImage(null); // No image available
       }
     }
   };
 
-  // Handle logout functionality
+  // Logout function
   const handleLogout = () => {
     localStorage.removeItem("username");
     localStorage.removeItem("password");
     navigate("/"); // Redirect to login page
   };
 
+  // Add the selected cat breed to favorites
+  const handleAddToFavorites = () => {
+    if (breedDetails) {
+      const alreadyFavorited = catFavorites.some(breed => breed.id === breedDetails.id);
+
+      if (!alreadyFavorited) {
+        dispatch(addCatFavorite({ breed: breedDetails, type: 'cat' }));
+        alert(`${breedDetails.name} added to favorites!`);
+      } else {
+        alert(`${breedDetails.name} is already in your favorites!`);
+      }
+    }
+  };
+
   return (
     <div className="cat-container">
       <div className="header">
         <h2>Select a Cat Breed</h2>
-        <button className="logout-btn" onClick={handleLogout}>
-          Logout
-        </button>
+        <div className="ad">
+          <button className="logout-btn" onClick={handleLogout}>
+            Logout
+          </button>
+          <button className="logout-btn">
+            <a href="/favorites">Favorites</a>
+          </button>
+          <button className="logout-btn">
+            <a href="/dog">Dog Search</a>
+          </button>
+        </div>
       </div>
       <select onChange={handleBreedChange} value={selectedBreed}>
         <option value="">Select a breed</option>
@@ -78,15 +103,12 @@ const Cat = () => {
           ) : (
             <p>No image available</p>
           )}
-          <p>
-            <strong>Origin:</strong> {breedDetails.origin || "Unknown"}
-          </p>
-          <p>
-            <strong>Temperament:</strong> {breedDetails.temperament || "Unknown"}
-          </p>
-          <p>
-            <strong>Life Span:</strong> {breedDetails.life_span}
-          </p>
+          <p><strong>Origin:</strong> {breedDetails.origin || "Unknown"}</p>
+          <p><strong>Temperament:</strong> {breedDetails.temperament || "Unknown"}</p>
+          <p><strong>Life Span:</strong> {breedDetails.life_span}</p>
+          <div>
+            <button onClick={handleAddToFavorites}>Add to Favorites</button>
+          </div>
         </div>
       )}
     </div>
