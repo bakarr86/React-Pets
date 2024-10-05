@@ -51,4 +51,10 @@
   margin-top: 20px;
   }
   
-  
+  .ad button{
+    margin-left:20px;
+  }
+   button a {
+    text-decoration: none;
+    color: #fff;
+  }
