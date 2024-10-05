@@ -2,6 +2,7 @@ import { BrowserRouter as Router, Route, Routes, Navigate } from "react-router-d
 import Dog from "./Dog";
 import Cat from "./Cat";
 import Login from "./Login";
+import Favourites from "./Favourites";
 import './App.css'; // Import custom CSS file
 
 const App = () => {
@@ -9,7 +10,8 @@ const App = () => {
   const isLoggedIn = localStorage.getItem("username") && localStorage.getItem("password");
 
   return (
-    <Router>
+  
+          <Router>
       <Routes>
         {/* If not logged in, redirect to login page */}
         <Route path="/" element={isLoggedIn ? <Navigate to="/app" /> : <Login />} />
@@ -33,8 +35,11 @@ const App = () => {
         {/* Dog and Cat routes */}
         <Route path="/dog" element={<Dog />} />
         <Route path="/cat" element={<Cat />} />
+        <Route path="/favorites" element={<Favourites />} />
       </Routes>
     </Router>
+ 
+   
   );
 };
 
