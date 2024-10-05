@@ -1,3 +1,4 @@
+Get information about pet using the cat/dog API and you can list your favorite pets.
 # React + Vite
 
 This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
